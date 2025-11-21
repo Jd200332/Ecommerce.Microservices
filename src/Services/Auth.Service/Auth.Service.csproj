@@ -26,4 +26,8 @@
     <ProjectReference Include="..\..\Shared\ECommerce.MessageBus\ECommerce.MessageBus.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>
