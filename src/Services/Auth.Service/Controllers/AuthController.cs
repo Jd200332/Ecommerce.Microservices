@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Auth.Service.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService authservice;
@@ -16,8 +18,9 @@ namespace Auth.Service.Controllers
             this.authservice = authservice;
         }
 
+        
         [HttpPost("register")]
-        public async Task<ActionResult<ApiResponse<AuthResponse>>> Register(RegisterRequest request)
+        public async Task<ActionResult<ApiResponse<AuthResponse>>> Register([FromBody]RegisterRequest request)
         {
             var result = await authservice.RegisterAsync(request);
             return Ok(ApiResponse<AuthResponse>.SuccessResult
@@ -28,7 +31,7 @@ namespace Auth.Service.Controllers
 
         [HttpPost("login")]
         
-        public async Task<ActionResult<ApiResponse<AuthResponse>>> Login(LoginRequest request)
+        public async Task<ActionResult<ApiResponse<AuthResponse>>> Login([FromBody]LoginRequest request)
         {
             var result = await authservice.LoginAsync(request);
             return Ok(ApiResponse<AuthResponse>.SuccessResult(result,

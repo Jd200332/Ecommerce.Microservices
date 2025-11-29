@@ -8,9 +8,6 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging; 
 
 
-
-
-
 namespace ECommerce.Shared.Middleware
 {
     public class GlobalExceptionMiddleware
@@ -20,8 +17,8 @@ namespace ECommerce.Shared.Middleware
 
         public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
         {
-            next = next;
-            logger = logger;
+            this.next = next;
+            this.logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)

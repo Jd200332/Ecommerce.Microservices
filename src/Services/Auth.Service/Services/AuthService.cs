@@ -36,13 +36,24 @@ namespace Auth.Service.Services
             if (existingUser != null)
                 throw new InvalidOperationException("User already exists");
 
+            if(request.PhoneNumber == null || request.PhoneNumber.Length > 10)
+                throw new InvalidOperationException("Phone number cannot exceed 10 digits");
+
+
             var user = new ApplicationUser
             {
                 UserName = request.Email,
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber
+                PhoneNumber = request.PhoneNumber,
+                Address = "N/A",
+                City = "N/A",
+                State = "N/A",
+                Country = "N/A",
+                ZipCode = "0000000",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
