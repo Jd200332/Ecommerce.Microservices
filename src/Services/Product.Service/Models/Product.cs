@@ -22,7 +22,7 @@ namespace Product.Service.Models
 
         public int CategoryId { get; set; } 
 
-        public CategoryAttribute Category { get; set; }
+        public Category Category { get; set; }
 
         [MaxLength(500)]
         public string ImageUrl { get; set; }   
