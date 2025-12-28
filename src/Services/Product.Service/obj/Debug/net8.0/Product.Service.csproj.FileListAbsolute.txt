@@ -175,3 +175,4 @@ C:\Project\Ecommerce.Microservices\src\Services\Product.Service\obj\Debug\net8.0
 C:\Project\Ecommerce.Microservices\src\Services\Product.Service\obj\Debug\net8.0\Product.Service.pdb
 C:\Project\Ecommerce.Microservices\src\Services\Product.Service\obj\Debug\net8.0\Product.Service.genruntimeconfig.cache
 C:\Project\Ecommerce.Microservices\src\Services\Product.Service\obj\Debug\net8.0\ref\Product.Service.dll
+C:\Project\Ecommerce.Microservices\src\Services\Product.Service\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

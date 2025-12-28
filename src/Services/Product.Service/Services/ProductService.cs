@@ -18,11 +18,13 @@ namespace Product.Service.Services
             this.logger = logger;
         }
 
-        public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync()
+        public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync(int page = 1, int pagesize = 20)
         {
             return await context.Products
-                .Include(p => p.Category)
                 .Where(p => p.IsActive)
+                .OrderBy(p => p.Id)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
                 .Select(p => new ProductResponse
                 {
                     Id = p.Id,
@@ -63,11 +65,13 @@ namespace Product.Service.Services
             };
         }
 
-        public async Task<IEnumerable<ProductResponse>> GetProductsByCategoryAsync(int categoryId)
+        public async Task<IEnumerable<ProductResponse>> GetProductsByCategoryAsync(int categoryId, int page = 1, int pagesize = 20)
         {
             return await context.Products
-                .Include(p => p.Category)
                 .Where(p => p.CategoryId == categoryId && p.IsActive)
+                .OrderBy(p => p.Id)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
                 .Select(p => new ProductResponse
                 {
                     Id = p.Id,

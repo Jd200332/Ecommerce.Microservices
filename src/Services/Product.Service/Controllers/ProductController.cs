@@ -20,7 +20,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ProductResponse>>>> GetAll()
+        public async Task<ActionResult<ApiResponse<IEnumerable<ProductResponse>>>> GetAll(int page = 1, int pagesize = 20)
         {
             var products = await productService.GetAllProductsAsync();
             return Ok(ApiResponse<IEnumerable<ProductResponse>>.SuccessResult(products));
@@ -35,14 +35,14 @@ namespace Product.Service.Controllers
 
 
         [HttpGet("category/{categoryId}")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ProductResponse>>>> GetByCategory(int caterg)
+        public async Task<ActionResult<ApiResponse<IEnumerable<ProductResponse>>>> GetByCategory(int categoryId, int page = 1, int pagesize = 20)
         {
             var products = await productService.GetProductsByCategoryAsync(categoryId);
             return Ok(ApiResponse<IEnumerable<ProductResponse>>.SuccessResult(products));
         }
 
         [HttpPost]
-        [Authorize]
+
         public async Task<ActionResult<ApiResponse<ProductResponse>>> Create(CreateProductRequest request)
         {
             var product = await productService.CreateProductAsync(request);
@@ -50,7 +50,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        
         public async Task<ActionResult<ApiResponse<bool>>> Update(int id, UpdateProductRequest request)
         {
             var result = await productService.UpdateProductAsync(id, request);
@@ -58,7 +58,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        
         public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
         {
             var result = await productService.DeleteProductAsync(id);
@@ -66,7 +66,7 @@ namespace Product.Service.Controllers
         }
 
         [HttpPatch("{id}/stock")]
-        [Authorize]
+        
         public async Task<ActionResult<ApiResponse<bool>>> UpdateStock(int id, [FromBody] int quantity)
         {
             var result = await productService.UpdateStockAsync(id, quantity);
