@@ -48,6 +48,7 @@ namespace Order.Service.DTOs
         public string ZipCode { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; }
+        public List<OrderItemResponse> Items { get; internal set; }
     }
 
     public class OrderItemResponse

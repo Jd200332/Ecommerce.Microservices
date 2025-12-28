@@ -104,7 +104,7 @@ namespace Order.Service.Services
                 .OrderByDescending(o => o.CreatedAt)
                 .Select(o => new OrderResponse
                 {
-                    Id = o.Id,
+                    Id = o.Id.ToString(),
                     UserId = o.UserId,
                     TotalAmount = o.TotalAmount,
                     Status = o.Status,
@@ -120,7 +120,7 @@ namespace Order.Service.Services
                         ProductName = i.ProductName,
                         Price = i.Price,
                         Quantity = i.Quantity,
-                        Subtotal = i.Subtotal
+                        SubTotal = i.SubTotal
                     }).ToList()
                 })
                 .ToListAsync();
@@ -139,7 +139,7 @@ namespace Order.Service.Services
 
             return new OrderResponse
             {
-                Id = order.Id,
+                Id = order.Id.ToString(),
                 UserId = order.UserId,
                 TotalAmount = order.TotalAmount,
                 Status = order.Status,
@@ -155,7 +155,7 @@ namespace Order.Service.Services
                     ProductName = i.ProductName,
                     Price = i.Price,
                     Quantity = i.Quantity,
-                    Subtotal = i.Subtotal
+                    SubTotal = i.SubTotal
                 }).ToList()
             };
         }
