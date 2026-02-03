@@ -15,7 +15,7 @@ namespace Order.Service.Controllers
 
         public OrderController(IOrderService orderService)
         {
-            orderService = this.orderService;
+            this.orderService = orderService;
         }
 
         [HttpPost]

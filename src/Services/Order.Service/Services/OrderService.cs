@@ -1,27 +1,28 @@
 ﻿using ECommerce.MessageBus;
 using ECommerce.MessageBus.Events;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Order.Service.Data;
 using Order.Service.DTOs;
 using Order.Service.Models;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Order.Service.Services
 {
-    public class OrderService
+    public class OrderService : IOrderService
     {
         private readonly OrderDbContext context;
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IMessageBus messageBus;
         private readonly ILogger<OrderService> logger;
-    
+       
 
-
-    public OrderService(
-        OrderDbContext context,
-        IHttpClientFactory httpClientFactory,
-        IMessageBus messageBus,
-        ILogger<OrderService> logger)
+        public OrderService(
+            OrderDbContext context,
+            IHttpClientFactory httpClientFactory,
+            IMessageBus messageBus,
+            ILogger<OrderService> logger)
         {
             this.context = context;
             this.httpClientFactory = httpClientFactory;
@@ -30,24 +31,62 @@ namespace Order.Service.Services
         }
 
 
-        public async Task<OrderResponse> CreateOrderAsync(string userId, CreateOrderRequest request)
+        public async Task<OrderResponse> CreateOrderAsync(string userId, decimal TotalAmount,
+            CreateOrderRequest request, string Status, string ShippingAddress)
         {
-            var order = new Models.Order
+            if (userId == null)
             {
-                UserId = userId,
-                ShippingAddress = request.ShippingAddress,
-                City = request.City,
-                State = request.State,
-                ZipCode = request.ZipCode,
-                Country = request.Country,
-                OrderItems = new List<Models.OrderItem>()
-            };
+                throw new InvalidOperationException("User ID cannot be null");
+            }
+
+            if(ShippingAddress.Length > 50 || ShippingAddress.Length <50)
+            {
+                
+                    throw new InvalidOperationException
+                        ("Address Limit exceeds");
+                
+            }
+            
+            if(ShippingAddress == null)
+            {
+                throw new InvalidOperationException
+                    ("Shipping Address cannot be null");
+            }
+
+                var order = new Models.Order
+                {
+                    UserId = userId,
+                    ShippingAddress = request.ShippingAddress,
+                    City = request.City,
+                    State = request.State,
+                    ZipCode = request.ZipCode,
+                    Country = request.Country,
+                    OrderItems = new List<Models.OrderItem>()
+                };
 
             decimal totalAmount = 0;
 
+            const decimal maxorderamount = 100000;
+
+
+            if (TotalAmount <= 0)
+            {
+                throw new InvalidOperationException
+                    ("Total amount must be greater than zero");
+            }
+
+            if (TotalAmount > maxorderamount)
+            {
+                throw new InvalidOperationException
+                     ($"Total amount cannot exceed {maxorderamount}");
+
+            }
+
+            
+
             var productClient = httpClientFactory.CreateClient("ProductService");
 
-            foreach(var item in request.Items)
+            foreach (var item in request.Items)
             {
                 var response = await productClient.GetAsync($"/api/product/{item.ProductId}");
                 if (!response.IsSuccessStatusCode)
@@ -93,12 +132,77 @@ namespace Order.Service.Services
 
             await messageBus.PublishAsync(orderEvent, "order-created");
 
-            return await GetOrderByIdAsync(order.Id, userId);
+
+            return new OrderResponse
+            {
+                Id = order.Id.ToString(),
+                UserId = order.UserId,
+                TotalAmount = order.TotalAmount,
+                Status = order.Status,
+                ShippingAddress = order.ShippingAddress,
+                City = order.City,
+                State = order.State,
+                Country = order.Country,
+                ZipCode = order.ZipCode,
+                CreatedAt = order.CreatedAt,
+                Items = order.OrderItems.Select(i => new OrderItemResponse
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.ProductName,
+                    Price = i.Price,
+                    Quantity = i.Quantity,
+                    SubTotal = i.SubTotal
+                }).ToList()
+            };
         }
 
 
-        public async Task<IEnumerable<OrderResponse>> GetUserOrdersAsync(string userId)
+        public async Task<IEnumerable<OrderResponse>> GetUserOrdersAsync(string userId, int OrderId, 
+            int ProductId, string ProductName, decimal Price, int Quantity, decimal SubTotal
+            )
         {
+
+            if(userId == null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            if(OrderId == null)
+            {
+                throw new ArgumentNullException(nameof(OrderId));
+            }
+
+            var ord = context.Orders
+                .Where(o => o.Id == OrderId)
+                .OrderByDescending(o => o.CreatedAt);
+
+
+            try
+            {
+                if(context.Orders == null)
+                {
+                    throw new InvalidOperationException("No orders found for the user");
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving orders for user {UserId}", userId);
+                throw;
+            }
+
+            if (ProductId == null)
+            {
+                throw new ArgumentNullException(nameof(ProductId));
+            }
+
+            if (ProductName == null)
+            {
+                throw new KeyNotFoundException("Invalid ProductName");
+            }
+
+            
+            
+
             return await context.Orders
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.CreatedAt)
@@ -181,7 +285,7 @@ namespace Order.Service.Services
 
             if (order.Status != "Pending")
                 throw new InvalidOperationException("Cannot cancel order in current status");
-
+            
             order.Status = "Cancelled";
             order.UpdatedAt = DateTime.UtcNow;
             await context.SaveChangesAsync();

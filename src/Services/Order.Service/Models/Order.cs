@@ -14,7 +14,7 @@ namespace Order.Service.Models
 
         [Required]
         public string Status { get; set; } = "Pending";
-
+        
         public string ShippingAddress { get; set; }
 
         public string City { get; set; }
@@ -29,11 +29,11 @@ namespace Order.Service.Models
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 
-    public class OrderItem
+    public class OrderItem 
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
-        public Order Order { get; set; }    
+        public Order Orders { get; set; }    
         public int ProductId { get; set; }
 
         public string ProductName { get; set; }

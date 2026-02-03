@@ -9,7 +9,7 @@ namespace Product.Service.Services
     public class ProductService : IProductService
     {
         private readonly ProductDbContext context;
-        private readonly ILogger<ProductService> logger;    
+        private readonly ILogger<ProductService> logger;
 
         public ProductService(ProductDbContext context,
             ILogger<ProductService> logger)
@@ -32,8 +32,8 @@ namespace Product.Service.Services
                     Description = p.Description,
                     Price = p.Price,
                     StockQuantity = p.StockQuantity,
-                    CategoryId = p.CategoryId,  
-                    CategoryName = p.Category.Name, 
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category.Name,
                     ImageUrl = p.ImageUrl,
                     IsActive = p.IsActive
                 })
@@ -46,7 +46,7 @@ namespace Product.Service.Services
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            if(product == null)
+            if (product == null)
             {
                 throw new KeyNotFoundException("Product not found");
             }
@@ -109,13 +109,13 @@ namespace Product.Service.Services
         public async Task<bool> UpdateProductAsync(int id, UpdateProductRequest request)
         {
             var product = await context.Products.FindAsync(id);
-            if(product == null)
+            if (product == null)
             {
                 throw new KeyNotFoundException("Product not found");
             }
 
             product.Name = request.Name ?? product.Name;
-            product.Description = request.Description ?? product.Description;   
+            product.Description = request.Description ?? product.Description;
             product.Price = request.Price ?? product.Price;
             product.StockQuantity = request.StockQuantity ?? product.StockQuantity;
             product.CategoryId = request.CategoryId ?? product.CategoryId;
@@ -143,7 +143,7 @@ namespace Product.Service.Services
         public async Task<bool> UpdateStockAsync(int productId, int quantity)
         {
             var product = await context.Products.FindAsync(productId);
-            if(product == null)
+            if (product == null)
                 throw new KeyNotFoundException("Product not found");
 
             product.StockQuantity += quantity;
