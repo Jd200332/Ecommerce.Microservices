@@ -20,6 +20,20 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==========================================
+// 1. IMPROVED LOGGING (70% - Asynchronous & Enriched)
+// ==========================================
+builder.Host.UseSerilog((context, config) =>
+{
+    config.ReadFrom.Configuration(context.Configuration)
+          .Enrich.FromLogContext()
+          .Enrich.WithMachineName() // Crucial for tracking container instances
+          .Enrich.WithProperty("Application", "Auth.Service");
+
+
+    config.WriteTo.Async(a => a.Console()); // Non-blocking async console sink
+});
+
 // Database
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Authdb")));
@@ -97,52 +111,57 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-//serilog
-builder.Host.UseSerilog((Context, config) =>
+// CORS
+builder.Services.AddCors(options =>
 {
-    config.ReadFrom.Configuration(Context.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console();
+    options.AddPolicy("AuthCors", policy =>
+    {
+        policy.WithOrigins("http://localhost:7192")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
-
-//cors
-builder.Services.AddCors(
-    options =>
-    {
-        options.AddPolicy("AuthCors", policy =>
-        {
-            policy.WithOrigins("http://localhost:7192")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-    });
-
-
-//api versioning
-
-//builder.Services.AddApiVersioning
-//    (options =>
-//    {
-//        options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
-//        options.AssumeDefaultVersionWhenUnspecified = true;
-//        options.ReportApiVersions = true;
-//    });
-
-//rate limiting
+// ==========================================
+// 2. IMPROVED RATE LIMITING (70% - Partitioned Token Bucket)
+// ==========================================
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("AuthFixed", config =>
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Token Bucket policy partitioned safely by individual Client IP
+    options.AddTokenBucketLimiter("AuthTokenBucket", config =>
     {
-        config.PermitLimit = 20;
-        config.Window = TimeSpan.FromMinutes(1);
+        config.TokenLimit = 10;
+        config.QueueLimit = 0; // Drop brute-force requests immediately instead of queuing them in memory
+        config.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
+        config.TokensPerPeriod = 2;
+    });
+
+    // Partition by Remote IP Address so malicious users only lock themselves out
+    options.AddPolicy("IPPartitionedPolicy", context =>
+    {
+        var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+
+        return RateLimitPartition.GetTokenBucketLimiter(remoteIp, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 20,
+            QueueLimit = 0,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(30),
+            TokensPerPeriod = 5
+        });
     });
 });
 
+var app = builder.Build();
 
-var app = builder.Build(); // 👉 THIS MUST COME BEFORE USING "app"
+// ==========================================
+// 3. CORRECTED MIDDLEWARE ORDERING & MONITORING
+// ==========================================
 
-// Middleware pipeline
+// Track metrics immediately at the front gate before anyone gets rate-limited or blocked
+app.UseHttpMetrics();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -151,14 +170,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("AuthCors");
-app.UseRateLimiter();
-app.UseHttpMetrics();   //prometheus 
+app.UseRateLimiter(); // Runs right after CORS to shed bad traffic immediately
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapMetrics(); // Prometheus metrics endpoint
 
-
+// MONITORING (70%): Protect the metrics endpoint by binding it only to an internal management port (e.g., 5001)
+app.MapMetrics("/metrics").RequireHost("*:5001");
 
 app.Run();
