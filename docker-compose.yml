@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  # ==================== INFRASTRUCTURE ====================
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ecommerce-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ecommerce-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ecommerce-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SQL_PASSWORD}", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
+  # ==================== MICROSERVICES ====================
+  authservice:
+    build:
+      context: .
+      dockerfile: Auth.Service/Dockerfile
+    container_name: ecommerce-auth
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__Authdb=Server=sqlserver;Database=AuthDb;User=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true
+      - ConnectionStrings__Redis=redis:6379
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=admin
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - JwtSettings__Key=${JWT_SECRET_KEY}
+    ports:
+      - "5001:8080"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  productservice:
+    build:
+      context: .
+      dockerfile: Product.Service/Dockerfile
+    container_name: ecommerce-product
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__Productdb=Server=sqlserver;Database=ProductDb;User=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true
+      - ConnectionStrings__Redis=redis:6379
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=admin
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+    ports:
+      - "5002:8080"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: Order.Service/Dockerfile
+    container_name: ecommerce-order
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__Orderdb=Server=sqlserver;Database=OrderDb;User=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true
+      - ConnectionStrings__Redis=redis:6379
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=admin
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+    ports:
+      - "5003:8080"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    container_name: ecommerce-gateway
+    depends_on:
+      - authservice
+      - productservice
+      - orderservice
+    environment:
+      - AuthService__Url=http://authservice:8080
+      - ProductService__Url=http://productservice:8080
+      - OrderService__Url=http://orderservice:8080
+    ports:
+      - "5000:8080"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:
+  redis_data:
+  sql_data:
+
+networks:
+  ecommerce-network:
+    driver: bridge

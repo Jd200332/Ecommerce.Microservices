@@ -13,10 +13,10 @@ namespace Auth.Service.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly JwtSettings _jwtSettings;
-        private readonly ILogger<AuthService> _logger;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly JwtSettings jwtSettings;
+        private readonly ILogger<AuthService> logger;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
@@ -24,15 +24,15 @@ namespace Auth.Service.Services
             IOptions<JwtSettings> jwtSettings,
             ILogger<AuthService> logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _jwtSettings = jwtSettings.Value;
-            _logger = logger;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+            this.jwtSettings = jwtSettings.Value;
+            this.logger = logger;
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
-            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            var existingUser = await userManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
                 throw new InvalidOperationException("User already exists");
 
@@ -56,7 +56,7 @@ namespace Auth.Service.Services
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var result = await _userManager.CreateAsync(user, request.Password);
+            var result = await userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -64,7 +64,7 @@ namespace Auth.Service.Services
             }
 
             var token = await GenerateJwtToken(user);
-            _logger.LogInformation("User registered: {Email}", user.Email);
+            logger.LogInformation("User registered: {Email}", user.Email);
 
             return new AuthResponse
             {
@@ -73,19 +73,28 @@ namespace Auth.Service.Services
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes)
+                Expires = DateTime.UtcNow.AddMinutes(jwtSettings.DurationInMinutes)
             };
         }
 
-        public async Task<AuthResponse> LoginAsync(LoginRequest request)
+        public async Task<AuthResponse> LoginAsync(LoginRequest request) 
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null)
                 throw new UnauthorizedAccessException("Invalid credentials");
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
             if (!result.Succeeded)
                 throw new UnauthorizedAccessException("Invalid credentials");
+
+            if(user.LockoutEnabled && user.LockoutEnd > DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Account is locked. Please try again later.");
+
+            if(user.UserName == null)
+            {
+                logger.LogWarning("User {Email} has no username set", user.Email);
+                throw new InvalidOperationException("User account is not properly configured");
+            }
 
             var token = await GenerateJwtToken(user);
 
@@ -96,15 +105,28 @@ namespace Auth.Service.Services
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes)
+                Expires = DateTime.UtcNow.AddMinutes(jwtSettings.DurationInMinutes)
             };
         }
 
         public async Task<bool> UpdateProfileAsync(string userId, UpdateProfileRequest request)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new KeyNotFoundException("User not found");
+
+            if (user.FirstName == null && user.LastName == null)
+                throw new InvalidOperationException
+                    ("First and last name cannot be null");
+
+            if(user.PhoneNumber.Length > 10)
+                throw new InvalidOperationException
+                    ("Phone number cannot exceed 10 digits");
+
+            if(user.PhoneNumber == null)
+                logger.LogWarning
+                    ("User {UserId} has no phone number set", user.Id);
+
 
             user.FirstName = request.FirstName ?? user.FirstName;
             user.LastName = request.LastName ?? user.LastName;
@@ -116,13 +138,13 @@ namespace Auth.Service.Services
             user.ZipCode = request.ZipCode ?? user.ZipCode;
             user.UpdatedAt = DateTime.UtcNow;
 
-            var result = await _userManager.UpdateAsync(user);
+            var result = await userManager.UpdateAsync(user);
             return result.Succeeded;
         }
 
         public async Task<object> GetProfileAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new KeyNotFoundException("User not found");
 
@@ -139,6 +161,8 @@ namespace Auth.Service.Services
                 user.Country,
                 user.ZipCode
             };
+
+
         }
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)
@@ -151,14 +175,14 @@ namespace Auth.Service.Services
                 new Claim("userId", user.Id)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
+                issuer: jwtSettings.Issuer,
+                audience: jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
+                expires: DateTime.UtcNow.AddMinutes(jwtSettings.DurationInMinutes),
                 signingCredentials: creds
             );
 

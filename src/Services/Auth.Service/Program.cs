@@ -8,7 +8,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Polly;
 using System.Text;
+using Serilog;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.AspNetCore.RateLimiting;
+using Prometheus;
+using System.Data.Common;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,6 +97,49 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+//serilog
+builder.Host.UseSerilog((Context, config) =>
+{
+    config.ReadFrom.Configuration(Context.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console();
+});
+
+
+//cors
+builder.Services.AddCors(
+    options =>
+    {
+        options.AddPolicy("AuthCors", policy =>
+        {
+            policy.WithOrigins("http://localhost:7192")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+
+
+//api versioning
+
+//builder.Services.AddApiVersioning
+//    (options =>
+//    {
+//        options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+//        options.AssumeDefaultVersionWhenUnspecified = true;
+//        options.ReportApiVersions = true;
+//    });
+
+//rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("AuthFixed", config =>
+    {
+        config.PermitLimit = 20;
+        config.Window = TimeSpan.FromMinutes(1);
+    });
+});
+
+
 var app = builder.Build(); // 👉 THIS MUST COME BEFORE USING "app"
 
 // Middleware pipeline
@@ -99,8 +150,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseCors("AuthCors");
+app.UseRateLimiter();
+app.UseHttpMetrics();   //prometheus 
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapMetrics(); // Prometheus metrics endpoint
+
+
 
 app.Run();

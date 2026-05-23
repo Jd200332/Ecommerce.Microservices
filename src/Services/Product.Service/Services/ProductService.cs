@@ -22,7 +22,7 @@ namespace Product.Service.Services
         {
             return await context.Products
                 .Where(p => p.IsActive)
-                .OrderBy(p => p.Id)
+                .OrderBy(p => p.Id) 
                 .Skip((page - 1) * pagesize)
                 .Take(pagesize)
                 .Select(p => new ProductResponse

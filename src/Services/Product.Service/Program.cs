@@ -1,31 +1,25 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Product.Service.Data;
 using Product.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Db
+// ======================= DB =======================
 builder.Services.AddDbContext<ProductDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Productdb")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Productdb")));
 
-// Controllers
+// =================== Controllers =================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// DI
+// ======================= DI =======================
 builder.Services.AddScoped<IProductService, ProductService>();
-
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer();
-
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Middleware
+// =================== Middleware ==================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -33,9 +27,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 

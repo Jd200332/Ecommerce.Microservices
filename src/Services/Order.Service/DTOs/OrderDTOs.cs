@@ -5,6 +5,11 @@ namespace Order.Service.DTOs
 {
     public class CreateOrderRequest
     {
+
+        [Required]
+
+        public decimal TotalAmount { get; set; }
+
         [Required]
         public string ShippingAddress { get; set; }
 

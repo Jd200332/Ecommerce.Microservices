@@ -39,7 +39,7 @@ namespace Order.Service.Services
                 throw new InvalidOperationException("User ID cannot be null");
             }
 
-            if(ShippingAddress.Length > 50 || ShippingAddress.Length <50)
+            if(ShippingAddress.Length > 50 )
             {
                 
                     throw new InvalidOperationException
@@ -157,51 +157,26 @@ namespace Order.Service.Services
         }
 
 
-        public async Task<IEnumerable<OrderResponse>> GetUserOrdersAsync(string userId, int OrderId, 
-            int ProductId, string ProductName, decimal Price, int Quantity, decimal SubTotal
-            )
+        public async Task<IEnumerable<OrderResponse>> GetUserOrdersAsync(string userId,
+    int? orderId = null,      
+    int? productId = null,    
+    string productName = null, 
+    decimal? minPrice = null,  
+    int? minQuantity = null,   
+    decimal? minSubTotal = null )
         {
 
-            if(userId == null)
+            if(string.IsNullOrEmpty(userId))
             {
-                throw new ArgumentNullException(nameof(userId));
+                throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
             }
 
-            if(OrderId == null)
-            {
-                throw new ArgumentNullException(nameof(OrderId));
-            }
-
-            var ord = context.Orders
-                .Where(o => o.Id == OrderId)
-                .OrderByDescending(o => o.CreatedAt);
+            var query = context.Orders
+                .Where(o => o.UserId == userId)
+                .AsQueryable();
 
 
-            try
-            {
-                if(context.Orders == null)
-                {
-                    throw new InvalidOperationException("No orders found for the user");
-                }
-            }
-            catch(Exception ex)
-            {
-                logger.LogError(ex, "Error retrieving orders for user {UserId}", userId);
-                throw;
-            }
 
-            if (ProductId == null)
-            {
-                throw new ArgumentNullException(nameof(ProductId));
-            }
-
-            if (ProductName == null)
-            {
-                throw new KeyNotFoundException("Invalid ProductName");
-            }
-
-            
-            
 
             return await context.Orders
                 .Where(o => o.UserId == userId)

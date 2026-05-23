@@ -35,6 +35,5 @@ namespace Order.Service.Data
                       .HasForeignKey(e => e.OrderId);
             });
         }
-
     }
 }
