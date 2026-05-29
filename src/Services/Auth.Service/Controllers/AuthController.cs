@@ -4,9 +4,11 @@ using ECommerce.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Auth.Service.Controllers
 {
+    
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -30,6 +32,8 @@ namespace Auth.Service.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
+        [EnableRateLimiting("IPartitionedpolicy")]
         
         public async Task<ActionResult<ApiResponse<AuthResponse>>> Login([FromBody]LoginRequest request)
         {
@@ -38,9 +42,10 @@ namespace Auth.Service.Controllers
                 "Login successful"));  
         }
 
-
+        
         [HttpGet("profile")]
-        [Authorize]
+        [AllowAnonymous]
+        [EnableRateLimiting("IPartitionedpolicy")]
         public async Task<ActionResult<ApiResponse<object>>> GetProfile()
         {
             var userid = User.FindFirstValue(ClaimTypes.NameIdentifier);

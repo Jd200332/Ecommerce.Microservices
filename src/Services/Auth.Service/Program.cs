@@ -27,11 +27,11 @@ builder.Host.UseSerilog((context, config) =>
 {
     config.ReadFrom.Configuration(context.Configuration)
           .Enrich.FromLogContext()
-          .Enrich.WithMachineName() // Crucial for tracking container instances
+           // Crucial for tracking container instances
           .Enrich.WithProperty("Application", "Auth.Service");
 
 
-    config.WriteTo.Async(a => a.Console()); // Non-blocking async console sink
+    // Non-blocking async console sink
 });
 
 // Database
