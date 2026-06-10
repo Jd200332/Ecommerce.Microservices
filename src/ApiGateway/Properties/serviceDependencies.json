@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "rabbitmq1": {
+      "type": "rabbitmq",
+      "connectionId": "QueueConnection",
+      "dynamicId": null
+    }
+  }
+}

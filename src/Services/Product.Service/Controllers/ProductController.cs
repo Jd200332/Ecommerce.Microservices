@@ -1,9 +1,11 @@
 ﻿using ECommerce.Shared.Models;
-using Microsoft.AspNetCore.Mvc;
-using Product.Service.DTOs;
-using Product.Service.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Product.Service.DTOs;
+using Product.Service.Services;
+using System.Threading.Tasks;
 
 namespace Product.Service.Controllers
 {
@@ -20,25 +22,37 @@ namespace Product.Service.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ProductResponse>>>> GetAll(int page = 1, int pagesize = 20)
+        public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetAllProductsAsync(int page = 1, int pagesize = 20)
         {
-            var products = await productService.GetAllProductsAsync();
-            return Ok(ApiResponse<IEnumerable<ProductResponse>>.SuccessResult(products));
+            var products =   productService.GetAllProductsAsync(page, pagesize);
+            var result = await products.ToListAsync();
+            return Ok(ApiResponse<IQueryable<ProductResponse>>.SuccessResult(products));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<ProductResponse>>> GetById(int id)
+        public async Task<ActionResult<ApiResponse<ProductResponse>>> GetProductByIdAsync(int id)
         {
-            var product = await productService.GetProductByIdAsync(id);
-            return Ok(ApiResponse<ProductResponse>.SuccessResult(product));
+            var result = await productService.GetProductByIdAsync(id);
+
+            if(result == null)
+            {
+                return NotFound(ApiResponse<ProductResponse>.ErrorResult($"Product {id} not found"));
+            }
+            return Ok(ApiResponse<ProductResponse>.SuccessResult(result));
         }
 
 
         [HttpGet("category/{categoryId}")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ProductResponse>>>> GetByCategory(int categoryId, int page = 1, int pagesize = 20)
+        public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetProdutsByCategoryAsync(int categoryId, int page = 1, int pagesize = 20)
         {
-            var products = await productService.GetProductsByCategoryAsync(categoryId);
-            return Ok(ApiResponse<IEnumerable<ProductResponse>>.SuccessResult(products));
+            var products = await productService.GetProductsByCategoryAsync(categoryId, page, pagesize); 
+             
+            if(products == null || products.Count == 0)
+            {
+                return Ok(ApiResponse<List<ProductResponse>>.ErrorResult
+                    ($"No products found for category {categoryId}"));
+            }
+            return Ok(ApiResponse<List<ProductResponse>>.SuccessResult(products));
         }
 
         [HttpPost]

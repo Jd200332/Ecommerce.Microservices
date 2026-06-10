@@ -30,14 +30,6 @@ namespace Product.Service.Data
             {
                 entity.HasKey(e => e.Id);
             });
-
-
-            modelBuilder.Entity<Category>().HasData
-                (
-                new Category { Id = 1, Name = "Electronics", Description = "Electronic items" },
-                new Category { Id = 2, Name = "Clothing", Description = "Apparel and fashion" },
-                new Category { Id = 3, Name = "Books", Description = "Books and magazines" }
-                );
         }
     }
 }

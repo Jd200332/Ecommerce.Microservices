@@ -17,6 +17,8 @@ builder.Services.AddSwaggerGen();
 // ======================= DI =======================
 builder.Services.AddScoped<IProductService, ProductService>();
 
+
+
 var app = builder.Build();
 
 // =================== Middleware ==================
