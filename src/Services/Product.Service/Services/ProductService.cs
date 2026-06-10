@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using System.Threading.Tasks;
+using Product.Service.Models;
+
 
 namespace Product.Service.Services
 {
@@ -25,44 +27,77 @@ namespace Product.Service.Services
 
         }
 
-        public IQueryable<ProductResponse> GetAllProductsAsync(int page = 1, int pagesize = 20)
+        public async Task<List<ProductResponse>> GetAllProductsAsync(int page = 1, int pagesize = 40,
+            string? search = null,
+            int? categoryId = null,
+            decimal? minPrice = null,        // Min price filter
+                decimal? maxPrice = null,        // Max price filter
+                 bool? inStockOnly = null,        // Only show items with stock > 0
+                 string? sortBy = null,           // "name", "price", "stock"
+                bool sortDescending = false
+            )
+
+
         {
 
-            if (page <= 0)
+            var query = context.Products.Where(p => p.IsActive);
+
+            if(!string.IsNullOrWhiteSpace(search))
             {
-                page = 1;
+                query = query.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
             }
 
-            if (pagesize <= 0)
+            if(categoryId.HasValue)
             {
-                pagesize = 20;
+                query = query.Where(p => p.CategoryId == categoryId.Value);
             }
 
-            else if (pagesize > 100)
+            if(minPrice.HasValue)
             {
-                pagesize = 100;
+                query = query.Where(p => p.Price >= minPrice.Value);
             }
 
-            return context.Products
-                .Where(p => p.IsActive)
-                .Skip((page - 1) * pagesize)
-                .Take(pagesize)
-                .Select(p => new ProductResponse
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
+            if(maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            if(inStockOnly.HasValue && inStockOnly.Value)
+            {
+                query = query.Where(p => p.StockQuantity > 0);
+            }
+
+           
+            var products = await (
+                from p in context.Products
+                join c in context.Categories on p.CategoryId equals c.Id
+                select new ProductResponse
+                 {
+                     Id = p.Id,
+                     Name = p.Name,
+                     Description = p.Description,
                     Price = p.Price,
-                    StockQuantity = p.StockQuantity,    
+                    StockQuantity = p.StockQuantity,
                     CategoryId = p.CategoryId,
                     ImageUrl = p.ImageUrl,
                     IsActive = p.IsActive,
-                   
-                });
+                    CategoryName = c.Name,
+                    CategoryDescription = c.Description
+
+                })
+                .OrderBy(p => p.Id)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
+                .ToListAsync();
+
+            return products;
+
         }
 
         public async Task<ProductResponse> GetProductByIdAsync(int id)
         {
+
+
             var result = await context.Products
                 .Where(p => p.Id == id && p.IsActive)
                 .Select(p => new ProductResponse
@@ -104,23 +139,23 @@ namespace Product.Service.Services
 
         public async Task<ProductResponse> CreateProductAsync(CreateProductRequest request)
         {
-            
+            throw new NotImplementedException();
         }
 
 
         public async Task<bool> UpdateProductAsync(int id, UpdateProductRequest request)
         {
-           
+           throw new NotImplementedException();
         }
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-
+            throw new NotImplementedException();    
         }
 
         public async Task<bool> UpdateStockAsync(int productId, int quantity)
         {
-
+            throw new NotImplementedException();
         }
     }
 }

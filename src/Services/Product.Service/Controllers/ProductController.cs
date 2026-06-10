@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Product.Service.DTOs;
 using Product.Service.Services;
 using System.Threading.Tasks;
+using Product.Service.Models;
+using Product.Service.Data;
+using Product.Service.Controllers;
+
 
 namespace Product.Service.Controllers
 {
@@ -22,11 +26,16 @@ namespace Product.Service.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetAllProductsAsync(int page = 1, int pagesize = 20)
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetAllProductsAsync(int page = 1, int pagesize = 40)
         {
-            var products =   productService.GetAllProductsAsync(page, pagesize);
-            var result = await products.ToListAsync();
-            return Ok(ApiResponse<IQueryable<ProductResponse>>.SuccessResult(products));
+            // quick diagnostic log
+            var logger = HttpContext.RequestServices.GetService(typeof(Microsoft.Extensions.Logging.ILogger<ProductController>))
+                         as Microsoft.Extensions.Logging.ILogger;
+            logger?.LogInformation("GetAllProducts called with page={Page} pagesize={PageSize}", page, pagesize);
+
+            var products = await productService.GetAllProductsAsync(page, pagesize);
+            return Ok(ApiResponse<List<ProductResponse>>.SuccessResult(products));
         }
 
         [HttpGet("{id}")]
@@ -40,7 +49,7 @@ namespace Product.Service.Controllers
             }
             return Ok(ApiResponse<ProductResponse>.SuccessResult(result));
         }
-
+        
 
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetProdutsByCategoryAsync(int categoryId, int page = 1, int pagesize = 20)
