@@ -95,7 +95,7 @@ namespace Product.Service.Services
                    Description = p.Description,
                    Price = p.Price,
                    StockQuantity = p.StockQuantity,
-                   
+                   CategoryId = p.CategoryId
 
                })
 
