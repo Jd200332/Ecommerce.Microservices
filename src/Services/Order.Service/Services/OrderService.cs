@@ -34,29 +34,40 @@ namespace Order.Service.Services
         public async Task<OrderResponse> CreateOrderAsync(string userId, decimal TotalAmount,
             CreateOrderRequest request, string Status, string ShippingAddress)
         {
-         
-            
+            throw new NotImplementedException();
+
+
         }
 
 
-        public async Task<IQueryable<OrderResponse>> GetUserOrdersAsync( )
+        public async Task<IQueryable<OrderResponse>> GetUserOrdersAsync(string userId,
+                int? orderId = null,
+                int? productId = null,
+                string productName = null,
+                decimal? minPrice = null,
+                int? minQuantity = null,
+                decimal? minSubTotal = null)
         {
+            throw new NotImplementedException();
 
         }
 
 
         public async Task<OrderResponse> GetOrderByIdAsync(int orderId, string userId)
         {
-            
+            throw new NotImplementedException();
+
         }
 
         public async Task<bool> UpdateOrderStatusAsync(int OrderId, string status)
         {
+            throw new NotImplementedException();
 
         }
 
         public async Task<bool> CancelOrderAsync(int orderId, string userId)
         {
+            throw new NotImplementedException();
 
         }
     }
