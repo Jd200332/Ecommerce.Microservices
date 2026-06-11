@@ -2,7 +2,8 @@
 
 on:
   push:
-    branches: [ "master" ] # 🎯 Removed paths filter so it triggers on ANY push
+    branches: [ "master" ]
+  workflow_dispatch: # 🎯 This forces a manual "Run workflow" button to appear
 
 jobs:
   build-and-push:
