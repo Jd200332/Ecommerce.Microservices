@@ -96,7 +96,7 @@ namespace Product.Service.Services
 
         public async Task<ProductResponse> GetProductByIdAsync(int id)
         {
-
+            
 
             var result = await context.Products
                 .Where(p => p.Id == id && p.IsActive)
