@@ -3,7 +3,7 @@ name: Product Service CI
 on:
   push:
     branches: [ "main", "master" ]
-  workflow_dispatch: # 🎯 This forces the manual button to appear
+  workflow_dispatch: 
 
 jobs:
   build-and-push:
@@ -22,6 +22,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: . 
-          file: ./src/Services/ProductService/Dockerfile
+          file: ./src/services/ProductService/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/productservice:latest
