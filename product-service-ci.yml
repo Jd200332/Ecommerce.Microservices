@@ -2,9 +2,7 @@
 
 on:
   push:
-    branches: [ "master" ]
-    paths:
-      - 'src/Services/ProductService/**' # 🎯 Only runs when ProductService changes
+    branches: [ "master" ] # 🎯 Removed paths filter so it triggers on ANY push
 
 jobs:
   build-and-push:
