@@ -24,3 +24,4 @@ jobs:
           context: . 
           file: ./src/services/ProductService/Dockerfile
           push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/productservice:latest
