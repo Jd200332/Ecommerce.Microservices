@@ -1,0 +1,30 @@
+name: Product Service CI
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'src/Services/ProductService/**' # 🎯 Only runs when files in ProductService change
+
+jobs:
+  # --- CI JOB: Build and Verify Docker Image ---
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push ProductService Image
+        uses: docker/build-push-action@v5
+        with:
+          # Crucial: Context is root so the Dockerfile can access shared solution/library files if needed
+          context: . 
+          file: ./src/Services/ProductService/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/productservice:latest
