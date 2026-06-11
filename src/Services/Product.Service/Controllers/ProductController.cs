@@ -11,6 +11,8 @@ using Product.Service.Data;
 using Product.Service.Controllers;
 
 
+
+//Jd200332 password dockerusername and dockerpassword
 namespace Product.Service.Controllers
 {
     
