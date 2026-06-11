@@ -108,7 +108,8 @@ namespace Product.Service.Services
                     Price = p.Price,
                     StockQuantity = p.StockQuantity,
                     CategoryId = p.CategoryId,
-                    ImageUrl = p.ImageUrl
+                    ImageUrl = p.ImageUrl,
+                    IsActive = p.IsActive
                 })
 
             .FirstOrDefaultAsync();
