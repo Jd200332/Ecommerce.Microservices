@@ -3,7 +3,7 @@
 on:
   push:
     branches: [ "master" ]
-  workflow_dispatch: # 🎯 This forces a manual "Run workflow" button to appear
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -21,7 +21,7 @@ jobs:
       - name: Build and Push ProductService Image
         uses: docker/build-push-action@v5
         with:
-          context: . 
-          file: ./src/Services/ProductService/Dockerfile
+          context: .
+          file: ./src/Services/Product.Service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/productservice:latest
