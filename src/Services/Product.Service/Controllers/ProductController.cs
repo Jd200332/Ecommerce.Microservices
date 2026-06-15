@@ -27,7 +27,7 @@ namespace Product.Service.Controllers
             this.productService = productService;
         }
 
-        [HttpGet]
+        
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetAllProductsAsync(int page = 1, int pagesize = 40)
         {
@@ -56,14 +56,14 @@ namespace Product.Service.Controllers
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<ApiResponse<List<ProductResponse>>>> GetProdutsByCategoryAsync(int categoryId, int page = 1, int pagesize = 20)
         {
-            var products = await productService.GetProductsByCategoryAsync(categoryId, page, pagesize); 
+            var pbyc = await productService.GetProductsByCategoryAsync(categoryId, page, pagesize); 
              
-            if(products == null || products.Count == 0)
+            if(pbyc == null || pbyc.Count == 0)
             {
                 return Ok(ApiResponse<List<ProductResponse>>.ErrorResult
                     ($"No products found for category {categoryId}"));
             }
-            return Ok(ApiResponse<List<ProductResponse>>.SuccessResult(products));
+            return Ok(ApiResponse<List<ProductResponse>>.SuccessResult(pbyc));
         }
 
         [HttpPost]

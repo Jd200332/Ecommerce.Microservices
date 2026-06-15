@@ -109,33 +109,54 @@ namespace Product.Service.Services
                     StockQuantity = p.StockQuantity,
                     CategoryId = p.CategoryId,
                     ImageUrl = p.ImageUrl,
-                    IsActive = p.IsActive
+                    IsActive = p.IsActive   
                 })
 
             .FirstOrDefaultAsync();
             return result;
-
         }
 
-        public async Task<List<ProductResponse>> GetProductsByCategoryAsync(int categoryId, int page = 1, int pagesize = 20)
+        public async Task<List<ProductResponse>> GetProductsByCategoryAsync(int categoryId,  int page = 1, int pagesize = 20)
         {
-            return await context.Products
-               .Where(p => p.CategoryId == categoryId && p.IsActive)
-               .Skip((page - 1) * pagesize)
-               .Take(pagesize)
-               .Select
-               (p => new ProductResponse
-               {
-                   Id = p.Id,
-                   Name = p.Name,
-                   Description = p.Description,
-                   Price = p.Price,
-                   StockQuantity = p.StockQuantity,
-                   CategoryId = p.CategoryId
+            if (categoryId <= 0)
+            {
+                throw new ArgumentException("Invalid category", nameof(categoryId));
+            }
 
-               })
+            
 
-               .ToListAsync();
+            var totalcount = await context.Products.CountAsync(x => x.CategoryId == categoryId && x.IsActive == true);
+            
+            var pbyc = await (
+                from p in context.Products
+                join c in context.Categories
+                on p.CategoryId equals c.Id
+                where p.CategoryId == categoryId && p.IsActive
+                orderby p.Id ascending
+
+                select new ProductResponse
+                
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    IsActive = p.IsActive,
+                    CategoryId = p.CategoryId,
+                    CategoryName = c.Name
+
+                })
+                
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
+                .ToListAsync();
+
+
+
+            return pbyc;
+
+
         }
 
         public async Task<ProductResponse> CreateProductAsync(CreateProductRequest request)

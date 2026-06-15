@@ -9,8 +9,10 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /app
 
 # 1. Copy using exact lowercase repository paths
-COPY ["src/Services/Product.Service/Product.Service.csproj", "src/Services/Product.Service/"]
-COPY ["src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj", "src/Shared/Ecommerce.Shared/"]
+COPY ["src/Services/Product.Service/Product.Service.csproj", 
+"src/Services/Product.Service/"]
+COPY ["src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj",
+"src/Shared/Ecommerce.Shared/"]
 
 # 2. Force Docker to create the expected capitalized folder path inside the container so the csproj reference doesn't break
 RUN mkdir -p src/Shared/ECommerce.Shared && cp src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj src/Shared/ECommerce.Shared/
