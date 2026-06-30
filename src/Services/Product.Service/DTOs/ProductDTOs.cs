@@ -19,6 +19,13 @@ namespace Product.Service.DTOs
         [Required]
         public int CategoryId { get; set; }
         public string ImageUrl { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string CategoryName { get; set; }
+
+        [MaxLength(500)]
+        public string CategoryDescription { get; set; }
     }
 
     public class UpdateProductRequest

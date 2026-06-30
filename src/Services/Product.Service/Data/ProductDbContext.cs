@@ -10,7 +10,7 @@ namespace Product.Service.Data
             : base(options)
         {
         }
-
+        
 
         public DbSet<Product.Service.Models.Product> Products { get; set; }
         public DbSet<Product.Service.Models.Category> Categories { get; set; }

@@ -5,7 +5,9 @@ using ECommerce.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Text.Json;
-using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Logging;
+using System.Reflection;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 namespace ECommerce.Shared.Middleware
@@ -53,10 +55,25 @@ namespace ECommerce.Shared.Middleware
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response.Message = exception.Message;
                     break;
+                case FileNotFoundException:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = exception.Message;
+                    break;
+                case ArgumentOutOfRangeException:
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.Message = exception.Message;
+                    break;
+                case ArgumentNullException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    response.Message = exception.Message;
+                    break;
+
+
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     response.Message = "An error occurred";
                     break;
+
             }
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
