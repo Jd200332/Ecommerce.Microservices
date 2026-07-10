@@ -1,22 +1,32 @@
 ﻿using Cart.Service.Models;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Cart.Service.DTOs;
 
 namespace Cart.Service.Services
 {
    
     public interface ICartService
     {
-        Task<Cart.Service.Models.Cart> GetCart(int userId);
-        Task<CartItem> GetCartItem(int userId);
-
-        Task AddItem(int userId, int productId, int quantity, string ProductName, decimal price);
+        Task <List<GetCartResponse>> GetCart(int userId, int page = 1, int pagesize = 10);
+        
+        Task<CartData> Addtocart(AddToCartRequest requ, int userId);
 
         Task UpdateItemQuantity(int userId, int productId, int quantity);
 
         Task RemoveItem(int userId, int productId);
 
-        Task ClearCart(int ProductId, string ProductName, decimal Price, int quantity);
+        Task ClearCart(GetCartResponse response, int UserId);
 
         Task<decimal> GetTotal(int userId);
+
+    }
+
+    public interface IAdminAccess
+    {
+
+        Task<List<GetCartResponse>> GetCartforadmin(int page = 1, int pagesize = 10 );
     }
 }
+
+
+

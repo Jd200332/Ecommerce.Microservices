@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Cart.Service.Models;
 
 namespace Cart.Service.Data
 {
@@ -10,25 +11,58 @@ namespace Cart.Service.Data
         {
         }
 
-        public DbSet<Cart.Service.Models.Cart> Cart { get; set; }
+        public DbSet<CartData> Carts { get; set; }
 
-        public DbSet<Cart.Service.Models.CartItem> CartItems { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Cart.Service.Models.Cart>(entity =>
+            modelBuilder.Entity<CartData>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.UserId).IsUnique();
+
+                // Fix: Not unique—one user can have multiple carts (Active, CheckedOut, etc.)
+                entity.HasIndex(e => e.UserId)
+                      .IsUnique(false);  // Or remove IsUnique() entirely
+
+                // Indexes for common queries
+                entity.Property(e => e.SessionId)
+                      .HasMaxLength(450);
+
+                entity.HasIndex(e => e.SessionId); // For session-based lookups 
+
+                entity.HasIndex(e => e.Status); // For cleanup jobs
+
+                // Decimal precision
+                entity.Property(e => e.SubTotal)
+                      .HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Total)
+                      .HasColumnType("decimal(18,2)");
+                entity.Property(e => e.DiscountAmount)
+                      .HasColumnType("decimal(18,2)");
+
+                // RowVersion as concurrency token
+                
             });
 
-            modelBuilder.Entity<Cart.Service.Models.CartItem>(entity =>
+            modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                entity.HasOne(e => e.Cart)
-                       .WithMany(c => c.CartItems)
-                       .HasForeignKey(e => e.CartId);
+
+                // Fix: Use correct property name
+                entity.Property(e => e.LockedPrice)
+                      .HasColumnType("decimal(18,2)");
+
+                entity.HasIndex(e => e.CartId);
+                entity.HasIndex(e => e.ProductId);  
+
+
+
+                // Cascade delete
+                entity.HasOne<CartData>()
+                      .WithMany()
+                      .HasForeignKey(e => e.CartId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
