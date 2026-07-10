@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "src\ApiGateway\ApiGateway.csproj", "{815C6741-D8C1-49E7-B843-0134C61767AC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{60AC00CB-9C42-B24B-C252-2A5D1DFBFB4F} = {60AC00CB-9C42-B24B-C252-2A5D1DFBFB4F}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{984BB9B3-3FA3-BE33-9484-CAC21695A33C}"
 EndProject

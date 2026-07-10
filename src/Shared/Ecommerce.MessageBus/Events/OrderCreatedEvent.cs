@@ -21,4 +21,14 @@ namespace ECommerce.MessageBus.Events
         public int quantity { get; set; }
         public decimal price { get; set; }
     }
+
+    public class CartItemAddedEvent
+    {
+        public int UserId { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity {  get; set; }  
+        public decimal Price { get; set; }
+
+        public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+    }
 }

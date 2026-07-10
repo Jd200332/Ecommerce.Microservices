@@ -27,7 +27,6 @@ namespace Cart.Service.Services
             this.logger = logger;
             this.productCatalogClient = productCatalogClient;
 
-            
         }
 
         public async Task<CartData> Addtocart(AddToCartRequest requ, int userId)

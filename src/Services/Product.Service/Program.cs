@@ -45,6 +45,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Middleware
+app.UseRouting();
+app.UseRateLimiter();
 app.MapControllers();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
 
 app.Run();

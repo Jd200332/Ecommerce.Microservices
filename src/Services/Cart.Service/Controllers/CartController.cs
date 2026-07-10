@@ -9,6 +9,7 @@ using Amazon.XRay.Recorder.Core.Sampling.Local;
 using GSF.Threading;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Identity.Client;
+using ECommerce.MessageBus.Events;
 
 namespace Cart.Service.Controllers
 {
@@ -19,16 +20,19 @@ namespace Cart.Service.Controllers
         private readonly ICartService cartService;
         private readonly IAdminAccess adminaccess;
         private readonly ILogger<CartController> logger;
+        private readonly IMessageBus messageBus; 
         
 
         public CartController(ICartService cartService,
             ILogger<CartController> logger,
-            IAdminAccess adminacesss
+            IAdminAccess adminacesss,
+            IMessageBus messageBus
            )
         {
             this.cartService = cartService;
             this.logger = logger;
             this.adminaccess = adminacesss;
+            this.messageBus = messageBus;
             
         }
 
@@ -46,6 +50,15 @@ namespace Cart.Service.Controllers
         public async Task<ActionResult<CartData>> Addtocart(AddToCartRequest requ, int userId)
         {
             var cart = await cartService.Addtocart(requ, userId);
+
+            await messageBus.PublishAsync(new CartItemAddedEvent
+            {
+                UserId = userId,
+                ProductId = requ.ProductId,
+                Quantity = requ.Quantity,
+                Price = requ.Price, 
+                AddedAt = DateTime.UtcNow
+            }, "cart-queue");
 
             return Ok(cart);
         }
@@ -77,6 +90,4 @@ namespace Cart.Service.Controllers
         }
 
     }
-
-    
 }
