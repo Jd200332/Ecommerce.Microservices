@@ -20,17 +20,16 @@ builder.Services.AddDbContext<CartDbContext>(options =>
         builder.Configuration.GetConnectionString("CartDb")));
 
 // Register HttpClient for ProductCatalogClient
-builder.Services.AddHttpClient<ProductCatalogClient>((sp, client) =>
+builder.Services.AddHttpClient<IProductCatalogClient, ProductCatalogClient>(client =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
-    var baseUrl = config["ProductService:BaseUrl"]
-        ?? throw new InvalidOperationException("ProductService:BaseUrl is missing in appsettings.json");
+    var baseUrl = builder.Configuration["ProductService:BaseUrl"]
+        ?? throw new InvalidOperationException("ProductService:BaseUrl is missing");
     client.BaseAddress = new Uri(baseUrl);
 });
 
 // Register your services
 
-builder.Services.AddScoped<IProductCatalogClient, ProductCatalogClient>();
+
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAdminAccess, CartService>();
 

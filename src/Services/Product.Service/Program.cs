@@ -43,15 +43,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 
 // Middleware
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseRateLimiter();
 app.MapControllers();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
 
 app.Run();
