@@ -145,10 +145,10 @@ builder.Services.AddRateLimiter(options =>
 
         return RateLimitPartition.GetTokenBucketLimiter(remoteIp, _ => new TokenBucketRateLimiterOptions
         {
-            TokenLimit = 20,
+            TokenLimit = 100,
             QueueLimit = 0,
-            ReplenishmentPeriod = TimeSpan.FromSeconds(30),
-            TokensPerPeriod = 5
+            ReplenishmentPeriod = TimeSpan.FromSeconds(60),
+            TokensPerPeriod = 20
         });
     });
 });
@@ -177,6 +177,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // MONITORING (70%): Protect the metrics endpoint by binding it only to an internal management port (e.g., 5001)
-app.MapMetrics("/metrics").RequireHost("*:5001");
+//app.MapMetrics("/metrics").RequireHost("*:5001");
 
 app.Run();

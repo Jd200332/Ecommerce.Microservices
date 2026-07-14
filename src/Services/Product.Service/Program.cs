@@ -51,8 +51,8 @@ app.UseRouting();
 app.UseRateLimiter();
 app.MapControllers();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+//app.UseSwagger();
+//app.UseSwaggerUI();
 
 
 app.Run();

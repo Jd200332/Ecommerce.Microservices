@@ -1,4 +1,4 @@
-using Cart.Service.Data;
+﻿using Cart.Service.Data;
 using Cart.Service.Services;
 using ECommerce.MessageBus;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 // Register DbContext
 builder.Services.AddDbContext<CartDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("CartDb")));
+        builder.Configuration.GetConnectionString("Cartdb")));
 
 // Register HttpClient for ProductCatalogClient
 builder.Services.AddHttpClient<IProductCatalogClient, ProductCatalogClient>(client =>
@@ -28,17 +28,8 @@ builder.Services.AddHttpClient<IProductCatalogClient, ProductCatalogClient>(clie
 });
 
 // Register your services
-
-
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAdminAccess, CartService>();
-
-// IF CartService implements both ICartService and IAdminAccess, this is fine.
-// Ensure IProductCatalogClient is registered (if used in CartService constructor).
-// If CartService depends on IProductCatalogClient, you need to register it.
-// Example:
-// builder.Services.AddScoped<IProductCatalogClient, ProductCatalogClient>();
-
 
 // RabbitMQ
 var rabbitMqHost = builder.Configuration["RabbitMQ:Host"];
@@ -62,12 +53,17 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-// Middleware
+// =================== MIDDLEWARE ==================
+// ✅ SWAGGER – ONLY IN DEVELOPMENT
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseRouting();
 app.UseRateLimiter();
 app.MapControllers();
-app.UseSwagger();
-app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.Run();

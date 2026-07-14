@@ -1,0 +1,91 @@
+# name: Services CD
+
+# on:
+#   workflow_dispatch:
+
+# jobs:
+#   deploy-auth:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Login to Azure
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+#       - name: Deploy AuthService
+#         run: |
+#           az webapp config container set \
+#             --name authservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+#             --container-image-name ${{ secrets.DOCKER_USERNAME }}/authservice:latest \
+#             --container-registry-url https://index.docker.io
+          
+#           az webapp config appsettings set \
+#             --name authservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+#             --settings \
+#               ASPNETCORE_ENVIRONMENT=Production \
+#               ConnectionStrings__Productdb="${{ secrets.AZURE_SQL_CONNECTION }}" \
+#               JwtSettings__Key="${{ secrets.JWT_KEY }}"
+          
+#           az webapp restart \
+#             --name authservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+#   deploy-product:
+#     runs-on: ubuntu-latest
+#     needs: deploy-auth
+#     steps:
+#       - name: Login to Azure
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+#       - name: Deploy ProductService
+#         run: |
+#           az webapp config container set \
+#             --name productservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+#             --container-image-name ${{ secrets.DOCKER_USERNAME }}/productservice:latest \
+#             --container-registry-url https://index.docker.io
+          
+#           az webapp config appsettings set \
+#             --name productservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+#             --settings \
+#               ASPNETCORE_ENVIRONMENT=Production \
+#               ConnectionStrings__Productdb="${{ secrets.AZURE_SQL_CONNECTION }}" \
+#               JwtSettings__Key="${{ secrets.JWT_KEY }}"
+          
+#           az webapp restart \
+#             --name productservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+#   deploy-cart:
+#     runs-on: ubuntu-latest
+#     needs: deploy-product
+#     steps:
+#       - name: Login to Azure
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+#       - name: Deploy CartService
+#         run: |
+#           az webapp config container set \
+#             --name cartservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+#             --container-image-name ${{ secrets.DOCKER_USERNAME }}/cartservice:latest \
+#             --container-registry-url https://index.docker.io
+          
+#           az webapp config appsettings set \
+#             --name cartservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+#             --settings \
+#               ASPNETCORE_ENVIRONMENT=Production \
+#               ConnectionStrings__Productdb="${{ secrets.AZURE_SQL_CONNECTION }}" \
+#               JwtSettings__Key="${{ secrets.JWT_KEY }}"
+          
+#           az webapp restart \
+#             --name cartservice-app \
+#             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
