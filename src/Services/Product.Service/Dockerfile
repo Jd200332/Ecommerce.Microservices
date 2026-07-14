@@ -9,9 +9,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Exact physical casing from your disk (lowercase 'c' in Ecommerce and no Shared folder)
+# Source path does NOT have "src/", destination path matches what Dotnet expects
 COPY ["src/Services/Product.Service/Product.Service.csproj", "src/Services/Product.Service/"]
-COPY ["src/Ecommerce.Shared/Ecommerce.Shared.csproj", "src/Ecommerce.Shared/"]
+COPY ["Ecommerce.Shared/Ecommerce.Shared.csproj", "Ecommerce.Shared/"]
 
 RUN dotnet restore "src/Services/Product.Service/Product.Service.csproj"
 
