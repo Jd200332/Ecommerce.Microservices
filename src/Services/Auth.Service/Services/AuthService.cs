@@ -1,7 +1,7 @@
 ﻿using Auth.Service.Data;
 using Auth.Service.Dtos;
 using Auth.Service.Models;
-using ECommerce.Shared.Models;
+using Ecommerce.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

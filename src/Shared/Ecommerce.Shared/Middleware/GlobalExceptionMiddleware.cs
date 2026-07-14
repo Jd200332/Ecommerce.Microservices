@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Text.Json;
-using ECommerce.Shared.Models;
+using Ecommerce.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Text.Json;
@@ -10,7 +10,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 
-namespace ECommerce.Shared.Middleware
+namespace Ecommerce.Shared.Middleware
 {
     public class GlobalExceptionMiddleware
     {

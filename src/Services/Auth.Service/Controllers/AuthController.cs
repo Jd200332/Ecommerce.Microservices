@@ -1,6 +1,6 @@
 ﻿using Auth.Service.Dtos;
 using Auth.Service.Services;
-using ECommerce.Shared.Models;
+using Ecommerce.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;

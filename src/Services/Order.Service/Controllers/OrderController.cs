@@ -1,4 +1,4 @@
-﻿using ECommerce.Shared.Models;
+﻿using Ecommerce.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Order.Service.DTOs;

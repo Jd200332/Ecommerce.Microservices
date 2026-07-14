@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notification.Service", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerce.MessageBus", "src\Shared\Ecommerce.MessageBus\ECommerce.MessageBus.csproj", "{60AC00CB-9C42-B24B-C252-2A5D1DFBFB4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerce.Shared", "src\Shared\Ecommerce.Shared\ECommerce.Shared.csproj", "{7049A373-B1D0-A6A4-F676-B38805216A4A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Shared", "src\Shared\Ecommerce.Shared\Ecommerce.Shared.csproj", "{7049A373-B1D0-A6A4-F676-B38805216A4A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject

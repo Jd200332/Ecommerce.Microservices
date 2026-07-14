@@ -1,8 +1,8 @@
 ﻿using Auth.Service.Data;
 using Auth.Service.Models;
 using Auth.Service.Services;
-using ECommerce.Shared.Middleware;
-using ECommerce.Shared.Models;
+using Ecommerce.Shared.Middleware;
+using Ecommerce.Shared.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

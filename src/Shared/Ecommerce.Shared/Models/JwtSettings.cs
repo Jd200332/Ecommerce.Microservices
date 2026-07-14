@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECommerce.Shared.Models
+namespace Ecommerce.Shared.Models
 {
     public class JwtSettings
     {

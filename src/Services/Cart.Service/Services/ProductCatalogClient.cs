@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using ECommerce.Shared.Models;
+using Ecommerce.Shared.Models;
 
 namespace Cart.Service.Services
 {

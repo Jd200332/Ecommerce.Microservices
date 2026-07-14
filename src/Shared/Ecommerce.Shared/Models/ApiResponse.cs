@@ -1,4 +1,4 @@
-﻿namespace ECommerce.Shared.Models
+﻿namespace Ecommerce.Shared.Models
 {
     public class ApiResponse<T>
     {

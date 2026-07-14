@@ -10,8 +10,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Services/Auth.Service/Auth.Service.csproj", "src/Services/Auth.Service/"]
-COPY ["src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj", "src/Shared/Ecommerce.Shared/"]
-COPY ["src/Shared/Ecommerce.MessageBus/ECommerce.MessageBus.csproj", "src/Shared/Ecommerce.MessageBus/"]
+COPY ["src/Shared/Ecommerce.Shared/Ecommerce.Shared.csproj", "src/Shared/Ecommerce.Shared/"]
+COPY ["src/Shared/Ecommerce.MessageBus/Ecommerce.MessageBus.csproj", "src/Shared/Ecommerce.MessageBus/"]
 RUN dotnet restore "./src/Services/Auth.Service/Auth.Service.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Auth.Service"
