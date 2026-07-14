@@ -9,15 +9,15 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /app
 
 COPY ["src/Services/Product.Service/Product.Service.csproj", "src/Services/Product.Service/"]
-COPY ["src/Shared/Ecommerce.Shared/Ecommerce.Shared.csproj", "src/Shared/Ecommerce.Shared/"]
+COPY ["src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj", "src/Shared/Ecommerce.Shared/"]
 
-RUN mkdir -p src/Shared/Ecommerce.Shared && cp src/Shared/Ecommerce.Shared/Ecommerce.Shared.csproj src/Shared/Ecommerce.Shared/
+RUN mkdir -p src/Shared/ECommerce.Shared && cp src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj src/Shared/ECommerce.Shared/
 
 RUN dotnet restore "src/Services/Product.Service/Product.Service.csproj"
 
 COPY . .
 
-RUN ln -s /app/src/Shared/Ecommerce.Shared /app/src/Shared/Ecommerce.Shared || true
+RUN ln -s /app/src/Shared/Ecommerce.Shared /app/src/Shared/ECommerce.Shared || true
 
 WORKDIR "/app/src/Services/Product.Service"
 RUN dotnet build "Product.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
