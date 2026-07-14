@@ -35,7 +35,8 @@ builder.Services.AddScoped<IAdminAccess, CartService>();
 var rabbitMqHost = builder.Configuration["RabbitMQ:Host"];
 if (string.IsNullOrEmpty(rabbitMqHost))
 {
-    throw new Exception("RabbitMQ:Host is missing in appsettings.json");
+    //throw new Exception("RabbitMQ:Host is missing in appsettings.json");
+    rabbitMqHost = "localhost";
 }
 builder.Services.AddSingleton<IMessageBus>(sp =>
     new RabbitMQMessageBus(rabbitMqHost));
@@ -61,9 +62,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseRateLimiter();
 app.MapControllers();
-app.UseHttpsRedirection();
+
 
 app.Run();

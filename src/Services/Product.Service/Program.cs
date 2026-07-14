@@ -23,7 +23,7 @@ builder.Services.AddRateLimiter(options =>
         RateLimitPartition.GetFixedWindowLimiter(partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown", factory: partition => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 10, // Max 100 requests
-            Window = TimeSpan.FromMilliseconds(20), // Per 1 minute
+            Window = TimeSpan.FromMinutes(1), // Per 1 minute
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
             QueueLimit = 0 // No queuing, reject immediately when limit is exceeded
         }));
@@ -51,8 +51,8 @@ app.UseRouting();
 app.UseRateLimiter();
 app.MapControllers();
 
-//app.UseSwagger();
-//app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 
 app.Run();
