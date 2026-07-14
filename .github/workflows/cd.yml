@@ -1,0 +1,101 @@
+name: Build and Deploy Microservices
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 1. Restore only the two projects you want to deploy
+      - name: Restore NuGet Packages
+        run: |
+          dotnet restore src/Services/Product.Service/Product.Service.csproj
+          dotnet restore src/Services/Cart.Service/Cart.Service.csproj
+
+      # 2. Build only the two targeted projects cleanly
+      - name: Build Targeted Projects
+        run: |
+          dotnet build src/Services/Product.Service/Product.Service.csproj --no-restore --configuration Release
+          dotnet build src/Services/Cart.Service/Cart.Service.csproj --no-restore --configuration Release
+
+      # 3. Docker Logins & Pushes
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Product Service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Services/Product.Service/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/productservice:latest
+
+      - name: Build and Push Cart Service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Services/Cart.Service/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/cartservice:latest
+
+  deploy-product:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy ProductService
+        run: |
+          az webapp config container set \
+            --name ecommerceclone \
+            --resource-group ecommerce-microservices \
+            --container-image-name ${{ secrets.DOCKER_USERNAME }}/productservice:latest \
+            --container-registry-url https://index.docker.io
+          
+          az webapp config appsettings set \
+            --name ecommerceclone \
+            --resource-group ecommerce-microservices \
+            --settings ASPNETCORE_ENVIRONMENT=Production
+          
+          az webapp restart --name ecommerceclone --resource-group ecommerce-microservices
+
+  deploy-cart:
+    runs-on: ubuntu-latest
+    needs: deploy-product
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy CartService
+        run: |
+          az webapp config container set \
+            --name ecommercecart \
+            --resource-group ecommerce-microservices \
+            --container-image-name ${{ secrets.DOCKER_USERNAME }}/cartservice:latest \
+            --container-registry-url https://index.docker.io
+          
+          az webapp config appsettings set \
+            --name ecommercecart \
+            --resource-group ecommerce-microservices \
+            --settings ASPNETCORE_ENVIRONMENT=Production
+          
+          az webapp restart --name ecommercecart --resource-group ecommerce-microservices
