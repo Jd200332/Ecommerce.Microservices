@@ -1,14 +1,15 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
-EXPOSE 80
-ENV ASPNETCORE_URLS=http://+:80
+EXPOSE 8080
+EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Services/Cart.Service/Cart.Service.csproj", "src/Services/Cart.Service/"]
-COPY ["src/Shared/ECommerce.MessageBus/ECommerce.MessageBus.csproj", "src/Shared/ECommerce.MessageBus/"]
-COPY ["src/Shared/ECommerce.Shared/ECommerce.Shared.csproj", "src/Shared/ECommerce.Shared/"]
+COPY ["src/Shared/Ecommerce.MessageBus/ECommerce.MessageBus.csproj", "src/Shared/Ecommerce.MessageBus/"]
+COPY ["src/Shared/Ecommerce.Shared/ECommerce.Shared.csproj", "src/Shared/Ecommerce.Shared/"]
 RUN dotnet restore "./src/Services/Cart.Service/Cart.Service.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Cart.Service"
