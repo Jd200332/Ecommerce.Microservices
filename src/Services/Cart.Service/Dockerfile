@@ -9,12 +9,11 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy projects with exact case-sensitive paths
+# Fixed lowercase 'c' in Ecommerce and removed virtual 'Shared' folder
 COPY ["src/Services/Cart.Service/Cart.Service.csproj", "src/Services/Cart.Service/"]
-COPY ["src/ECommerce.MessageBus/ECommerce.MessageBus.csproj", "src/ECommerce.MessageBus/"]
+COPY ["src/Ecommerce.MessageBus/Ecommerce.MessageBus.csproj", "src/Ecommerce.MessageBus/"]
 COPY ["src/Ecommerce.Shared/Ecommerce.Shared.csproj", "src/Ecommerce.Shared/"]
 
-# Restore targeting the cart service
 RUN dotnet restore "src/Services/Cart.Service/Cart.Service.csproj"
 
 COPY . .
