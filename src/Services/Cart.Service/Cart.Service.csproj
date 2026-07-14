@@ -38,7 +38,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Shared\Ecommerce.MessageBus\ECommerce.MessageBus.csproj" />
-		<ProjectReference Include="..\..\Shared\ECommerce.Shared\ECommerce.Shared.csproj" />
+		<ProjectReference Include="..\..\Shared\Ecommerce.Shared\Ecommerce.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
