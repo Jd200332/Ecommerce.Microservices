@@ -9,10 +9,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Source paths do NOT have "src/", matching your actual disk layout
+# Copy using explicit relative paths from the workspace root
 COPY ["src/Services/Cart.Service/Cart.Service.csproj", "src/Services/Cart.Service/"]
-COPY ["Ecommerce.MessageBus/Ecommerce.MessageBus.csproj", "Ecommerce.MessageBus/"]
-COPY ["Ecommerce.Shared/Ecommerce.Shared.csproj", "Ecommerce.Shared/"]
+COPY ["./Ecommerce.MessageBus/Ecommerce.MessageBus.csproj", "Ecommerce.MessageBus/"]
+COPY ["./Ecommerce.Shared/Ecommerce.Shared.csproj", "Ecommerce.Shared/"]
 
 RUN dotnet restore "src/Services/Cart.Service/Cart.Service.csproj"
 

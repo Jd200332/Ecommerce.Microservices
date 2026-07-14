@@ -9,9 +9,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Source path does NOT have "src/", destination path matches what Dotnet expects
+# Copy using explicit relative paths from the workspace root
 COPY ["src/Services/Product.Service/Product.Service.csproj", "src/Services/Product.Service/"]
-COPY ["Ecommerce.Shared/Ecommerce.Shared.csproj", "Ecommerce.Shared/"]
+COPY ["./Ecommerce.Shared/Ecommerce.Shared.csproj", "Ecommerce.Shared/"]
 
 RUN dotnet restore "src/Services/Product.Service/Product.Service.csproj"
 
